@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Can Boxing Calculator</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Georgia, 'Times New Roman', serif;
+    background: #f4f4f0;
+    color: #222;
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 26px;
+    font-style: italic;
+    font-weight: bold;
+    margin-bottom: 6px;
+    color: #1a1a2e;
+  }
+
+  .subtitle {
+    text-align: center;
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 20px;
+    font-style: italic;
+  }
+
+  .layout {
+    display: flex;
+    gap: 20px;
+    max-width: 1300px;
+    margin: 0 auto;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  /* ── INPUT PANEL ── */
+  .input-panel {
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 22px 24px;
+    min-width: 260px;
+    flex-shrink: 0;
+  }
+
+  .input-panel h2 {
+    font-size: 15px;
+    font-weight: bold;
+    margin-bottom: 14px;
+    text-align: center;
+    font-style: italic;
+  }
+
+  .field-group {
+    margin-bottom: 18px;
+  }
+
+  .field-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+
+  .field-group select,
+  .field-group input[type="number"] {
+    width: 100%;
+    padding: 8px 10px;
+    font-size: 14px;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    background: #fff;
+    color: #222;
+    font-family: Georgia, serif;
+  }
+
+  .field-group select:focus,
+  .field-group input:focus {
+    outline: 2px solid #4169e1;
+    border-color: #4169e1;
+  }
+
+  .box-dims {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+
+  .box-dims input { text-align: center; }
+
+  .box-dims-labels {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    text-align: center;
+    font-size: 11px;
+    color: #888;
+    margin-top: 3px;
+  }
+
+  .go-btn {
+    width: 100%;
+    padding: 12px;
+    background: #4169e1;
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    font-family: Georgia, serif;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 6px;
+    transition: background 0.15s;
+  }
+
+  .go-btn:hover { background: #2a4bb5; }
+  .go-btn:active { transform: scale(0.98); }
+
+  .note {
+    font-size: 11px;
+    color: #888;
+    font-style: italic;
+    margin-top: 14px;
+    line-height: 1.6;
+  }
+
+  /* ── RESULTS PANEL ── */
+  .results-panel {
+    flex: 1;
+    min-width: 300px;
+  }
+
+  .packing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  .pack-card {
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 14px;
+    text-align: center;
+  }
+
+  .pack-card h3 {
+    font-size: 14px;
+    font-style: italic;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #1a1a2e;
+    border-bottom: 2px solid #4169e1;
+    padding-bottom: 6px;
+  }
+
+  canvas {
+    display: block;
+    width: 100%;
+    border: 1px solid #999;
+    border-radius: 6px;
+    background: #fff;
+    margin-bottom: 10px;
+  }
+
+  .pack-stats {
+    font-size: 12px;
+    line-height: 1.8;
+    color: #333;
+    text-align: left;
+  }
+
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px dashed #eee;
+    padding: 2px 0;
+  }
+
+  .stat-label { color: #666; }
+  .stat-value { font-weight: bold; color: #1a1a2e; }
+
+  .total-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #4169e1;
+  }
+
+  .best-badge {
+    background: #e8f0fe;
+    color: #2a4bb5;
+    font-size: 11px;
+    font-style: italic;
+    border-radius: 4px;
+    padding: 2px 8px;
+    margin-top: 6px;
+    display: inline-block;
+  }
+
+  .placeholder-msg {
+    text-align: center;
+    color: #aaa;
+    font-style: italic;
+    font-size: 14px;
+    padding: 40px 0;
+  }
+
+  .footnotes {
+    font-size: 11px;
+    font-style: italic;
+    color: #888;
+    margin-top: 10px;
+    max-width: 1300px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.7;
+  }
+
+  @media (max-width: 700px) {
+    .packing-grid { grid-template-columns: 1fr; }
+    .layout { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Can Boxing Calculator v1.11</h1>
+<p class="subtitle">Silgan Containers — Materials Applications Engineering</p>
+
+<div class="layout">
+
+  <!-- INPUT PANEL -->
+  <div class="input-panel">
+    <h2>Can &amp; Box Inputs</h2>
+
+    <div class="field-group">
+      <label>Can diameter (3-digit size)</label>
+      <select id="dmtr">
+        <option>202</option>
+        <option>208</option>
+        <option>209</option>
+        <option>209.5</option>
+        <option>211</option>
+        <option>300</option>
+        <option>301</option>
+        <option>303</option>
+        <option>307</option>
+        <option>401</option>
+        <option>404</option>
+        <option>603</option>
+      </select>
+    </div>
+
+    <div class="field-group">
+      <label>Can height (3-digit size)</label>
+      <input type="number" id="hght" value="400" min="0" step="1">
+    </div>
+
+    <div class="field-group">
+      <label>Box dimensions (decimal inches)</label>
+      <div class="box-dims">
+        <input type="number" id="blen" value="0" min="0" step="0.1">
+        <input type="number" id="bwid" value="0" min="0" step="0.1">
+        <input type="number" id="bhght" value="0" min="0" step="0.1">
+      </div>
+      <div class="box-dims-labels">
+        <span>Length</span><span>Width</span><span>Height</span>
+      </div>
+    </div>
+
+    <button class="go-btn" onclick="calculate()">Go!!</button>
+
+    <p class="note">
+      * Calculations do not take flange or double-seam width into account.<br>
+      ** Sizes use 3-digit US can standard: 401 = 4&nbsp;1/16"
+    </p>
+  </div>
+
+  <!-- RESULTS PANEL -->
+  <div class="results-panel" id="results-panel">
+    <div class="placeholder-msg">Enter can and box dimensions above, then click Go!!</div>
+  </div>
+
+</div>
+
+<p class="footnotes">
+  Created by: Warren Nanney — Materials Applications Engineering &nbsp;|&nbsp;
+  * Visualizer displays X-axis as longest axis regardless of input
+</p>
+
+<script>
+// ── 3-digit can size → decimal inches ──
+function sizeToInches(sizeStr) {
+  var s = String(sizeStr).replace('.5','');
+  var hasHalf = String(sizeStr).indexOf('.5') !== -1;
+  var inches = parseInt(s[0]);
+  var sixteenths = parseInt(s.slice(1));
+  if (hasHalf) sixteenths += 0.5;
+  return inches + sixteenths / 16;
+}
+
+function calculate() {
+  var dmtrVal = document.getElementById('dmtr').value;
+  var hghtVal = document.getElementById('hght').value;
+  var blenVal = parseFloat(document.getElementById('blen').value);
+  var bwidVal = parseFloat(document.getElementById('bwid').value);
+  var bhghtVal = parseFloat(document.getElementById('bhght').value);
+
+  if (!blenVal || !bwidVal || !bhghtVal || blenVal <= 0 || bwidVal <= 0 || bhghtVal <= 0) {
+    alert('Please enter all box dimensions greater than 0.');
+    return;
+  }
+
+  var cdia = sizeToInches(dmtrVal);
+  var ffch = sizeToInches(hghtVal);
+  var crad = cdia / 2;
+  var rtthree = Math.sqrt(3);
+
+  // Always make x the longer side
+  var x = Math.max(blenVal, bwidVal);
+  var y = Math.min(blenVal, bwidVal);
+  var z = bhghtVal;
+
+  // ── SQUARE PACK ──
+  var nx = Math.floor(x / cdia);
+  var ny = Math.floor(y / cdia);
+  var nz = Math.floor(z / ffch);
+  var xremain = round2(x % cdia);
+  var yremain = round2(y % cdia);
+  var zremain = round2(z % ffch);
+  var sptotal = nx * ny * nz;
+
+  // ── HEX PACK ──
+  var candistx = 0, countx = 0;
+  while (x > candistx + cdia) { candistx += cdia; countx++; }
+
+  var county = 0, candisty = 0;
+  while ((y - candisty) > (4*crad - (2*crad + crad*rtthree))) {
+    county++;
+    if (county === 1) candisty = cdia;
+    else candisty = 2*crad + (county-1)*crad*rtthree;
+  }
+  candisty -= (cdia - (4*crad-(2*crad+crad*rtthree)));
+  county--;
+
+  var totalcount, rowstagger;
+  if (round1(x - candistx) >= round1(crad)) {
+    totalcount = countx * county;
+    rowstagger = 0;
+  } else {
+    totalcount = 0;
+    for (var c = 0; c < county; c++) {
+      totalcount += (c % 2 === 0) ? countx : countx - 1;
+    }
+    rowstagger = 1;
+  }
+
+  var hxremain = round1(x - candistx);
+  var hyremain = round1(y - candisty);
+  var hxtotal = totalcount * nz;
+  var hexextra = (rowstagger === 0) ? round1(x - (candistx + crad)) : hxremain;
+
+  // ── HEX PACK 90° ──
+  var candisty90 = 0, county90 = 0;
+  while (y > candisty90 + cdia) { candisty90 += cdia; county90++; }
+
+  var countx90 = 0, candistx90 = 0;
+  while ((x - candistx90) > (4*crad - (2*crad + crad*rtthree))) {
+    countx90++;
+    if (countx90 === 1) candistx90 = cdia;
+    else candistx90 = 2*crad + (countx90-1)*crad*rtthree;
+  }
+  candistx90 -= (cdia - (4*crad-(2*crad+crad*rtthree)));
+  countx90--;
+
+  var totalcount90, rowstagger90;
+  if (round1(y - candisty90) >= round1(crad)) {
+    totalcount90 = countx90 * county90;
+    rowstagger90 = 0;
+  } else {
+    totalcount90 = 0;
+    for (var c90 = 0; c90 < countx90; c90++) {
+      totalcount90 += (c90 % 2 === 0) ? county90 : county90 - 1;
+    }
+    rowstagger90 = 1;
+  }
+
+  var hxremain90 = round1(x - candistx90);
+  var hyremain90 = round1(y - candisty90);
+  var hytotal90 = totalcount90 * nz;
+  var hexextra90 = (rowstagger90 === 0) ? round1(y - (candisty90 + crad)) : hyremain90;
+
+  // ── WHICH IS BEST? ──
+  var best = Math.max(sptotal, hxtotal, hytotal90);
+
+  // ── BUILD RESULTS HTML ──
+  var panel = document.getElementById('results-panel');
+  panel.innerHTML =
+    '<div class="packing-grid">' +
+      buildCard('Square pack', nx, ny, nz, xremain, yremain, zremain, sptotal, best, 'sq') +
+      buildCard('Hex pack', countx, county, nz, hexextra, hyremain, zremain, hxtotal, best, 'hx') +
+      buildCard('Hex pack — rotated 90°', countx90, county90, nz, hexextra90, hxremain90, zremain, hytotal90, best, 'hx90') +
+    '</div>';
+
+  // Draw all three canvases
+  drawSquare('canvas-sq', x, y, cdia, nx, ny);
+  drawHex('canvas-hx', x, y, cdia, countx, county, rowstagger, false);
+  drawHex('canvas-hx90', x, y, cdia, countx90, county90, rowstagger90, true);
+}
+
+function buildCard(title, cx, cy, cz, xr, yr, zr, total, best, id) {
+  var isBest = total === best && total > 0;
+  return '<div class="pack-card">' +
+    '<h3>' + title + '</h3>' +
+    '<canvas id="canvas-' + id + '" height="180"></canvas>' +
+    '<div class="pack-stats">' +
+      '<div class="stat-row"><span class="stat-label">Fit (L × W × layers)</span><span class="stat-value">' + cx + ' × ' + cy + ' × ' + cz + '</span></div>' +
+      '<div class="stat-row"><span class="stat-label">Space remaining</span><span class="stat-value">' + xr + '" × ' + yr + '" × ' + zr + '"</span></div>' +
+    '</div>' +
+    '<div class="total-row"><span>Total cans</span><span>' + total + '</span></div>' +
+    (isBest ? '<div><span class="best-badge">Best packing option</span></div>' : '') +
+    '</div>';
+}
+
+// ── DRAW SQUARE PACK ──
+function drawSquare(canvasId, x, y, cdia, nx, ny) {
+  var canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  var W = canvas.offsetWidth || 260;
+  canvas.width = W;
+  canvas.height = 180;
+  var ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, W, 180);
+
+  var pad = 6;
+  var scale = Math.min((W - pad*2) / x, (180 - pad*2) / y);
+  var bw = x * scale, bh = y * scale;
+  var ox = (W - bw) / 2, oy = (180 - bh) / 2;
+  var sdia = cdia * scale;
+
+  // box
+  ctx.fillStyle = '#f9f9f9';
+  ctx.strokeStyle = '#222';
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.rect(ox, oy, bw, bh); ctx.fill(); ctx.stroke();
+
+  // cans
+  for (var row = 0; row < ny; row++) {
+    for (var col = 0; col < nx; col++) {
+      var cx = ox + sdia * col + sdia/2;
+      var cy = oy + sdia * row + sdia/2;
+      ctx.beginPath();
+      ctx.arc(cx, cy, sdia/2 - 0.5, 0, Math.PI*2);
+      ctx.fillStyle = '#f9a825';
+      ctx.fill();
+      ctx.strokeStyle = '#c62828';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+  }
+}
+
+// ── DRAW HEX PACK ──
+function drawHex(canvasId, x, y, cdia, countx, county, rowstagger, rotated90) {
+  var canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  var W = canvas.offsetWidth || 260;
+  canvas.width = W;
+  canvas.height = 180;
+  var ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, W, 180);
+
+  var pad = 6;
+  var scale = Math.min((W - pad*2) / x, (180 - pad*2) / y);
+  var bw = x * scale, bh = y * scale;
+  var ox = (W - bw) / 2, oy = (180 - bh) / 2;
+  var sdia = cdia * scale;
+  var r = sdia / 2;
+  var rtthree = Math.sqrt(3);
+
+  // box
+  ctx.fillStyle = '#f9f9f9';
+  ctx.strokeStyle = '#222';
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.rect(ox, oy, bw, bh); ctx.fill(); ctx.stroke();
+
+  // clip to box
+  ctx.save();
+  ctx.beginPath(); ctx.rect(ox, oy, bw, bh); ctx.clip();
+
+  if (!rotated90) {
+    // Standard hex: rows along x, offset along y
+    for (var m = 0; m < county; m++) {
+      var colsInRow = (rowstagger === 1 && m % 2 !== 0) ? countx - 1 : countx;
+      for (var i = 0; i < colsInRow; i++) {
+        var xOff = (m % 2 !== 0) ? r : 0;
+        var cx = ox + r + sdia * i + xOff;
+        var cy = oy + r + m * r * rtthree;
+        drawCan(ctx, cx, cy, r);
+      }
+    }
+  } else {
+    // Rotated 90°: columns along y, offset along x
+    for (var m90 = 0; m90 < countx; m90++) {
+      var rowsInCol = (rowstagger === 1 && m90 % 2 !== 0) ? county - 1 : county;
+      for (var i90 = 0; i90 < rowsInCol; i90++) {
+        var yOff = (m90 % 2 !== 0) ? r : 0;
+        var cx90 = ox + r + m90 * r * rtthree;
+        var cy90 = oy + r + sdia * i90 + yOff;
+        drawCan(ctx, cx90, cy90, r);
+      }
+    }
+  }
+
+  ctx.restore();
+}
+
+function drawCan(ctx, cx, cy, r) {
+  ctx.beginPath();
+  ctx.arc(cx, cy, r - 0.5, 0, Math.PI*2);
+  ctx.fillStyle = '#f9a825';
+  ctx.fill();
+  ctx.strokeStyle = '#c62828';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+}
+
+function round1(v) { return Math.round(v * 10) / 10; }
+function round2(v) { return Math.round(v * 100) / 100; }
+
+// Redraw canvases on window resize
+window.addEventListener('resize', function() {
+  var btn = document.querySelector('.go-btn');
+  if (document.getElementById('canvas-sq')) calculate();
+});
+</script>
+</body>
+</html>
