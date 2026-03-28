@@ -315,6 +315,10 @@ function sizeToInches(sizeStr) {
 function calculate() {
   var dmtrVal = document.getElementById('dmtr').value;
   var hghtVal = document.getElementById('hght').value;
+  if (!/^\d{3}$/.test(String(hghtVal))) {
+    alert('Please enter a 3-digit can height (e.g. 411 means 4 inches, 11 sixteenths).');
+    return;
+  }
   var blenVal = parseFloat(document.getElementById('blen').value);
   var bwidVal = parseFloat(document.getElementById('bwid').value);
   var bhghtVal = parseFloat(document.getElementById('bhght').value);
