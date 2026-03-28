@@ -546,6 +546,11 @@ window.addEventListener('resize', function() {
   var btn = document.querySelector('.go-btn');
   if (document.getElementById('canvas-sq')) calculate();
 });
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') calculate();
+});
+
+ 
 </script>
 </body>
 </html>
